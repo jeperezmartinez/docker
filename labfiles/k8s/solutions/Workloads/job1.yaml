@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: connection-test
+spec:
+      completions: 10
+      template:
+        spec:
+          containers:
+          - name: test
+            image: busybox
+            args:
+            - /bin/ping
+            - -c
+            - "1"
+            - www.google.com
+          restartPolicy: OnFailure
+

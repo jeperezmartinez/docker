@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: rc1
+spec:
+  replicas: 2
+  selector:
+    app: bb
+  template:
+    metadata:
+      name: bbox
+      labels:
+        app: bb
+    spec:
+      containers:
+      - name: bb
+        image: busybox
+        command:
+        - sleep
+        - "1000"
+

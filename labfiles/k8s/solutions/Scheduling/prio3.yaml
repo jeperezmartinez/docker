@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bb
+spec:
+  replicas: 4
+  selector:
+   matchLabels:
+    app: bb
+  template:
+    metadata:
+      labels:
+        app: bb
+    spec:
+      priorityClassName: high-prio
+      containers:
+      - name: bb
+        image: busybox
+        command:
+          - sleep
+        args:
+          - "36000"
+        resources:
+          requests:
+             memory: "512Mi"

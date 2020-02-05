@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: shvol1
+    namespace: default
+
+spec:
+  containers:
+    - image: busybox
+      command:
+        - sleep
+        - "3600"
+      volumeMounts:
+        - mountPath: /data
+          name: test
+      name: processor
+    - image: busybox
+      command:
+        - sleep
+        - "3600"
+      volumeMounts:
+        - mountPath: /input
+          name: test
+      name: reader
+  volumes:
+    - name: test
+      emptyDir: {}
+

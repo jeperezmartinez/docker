@@ -1,0 +1,131 @@
+#!/bin/bash
+
+help () {
+echo -e "Usage: $0 command [NODE]"
+echo -e "Commands are:"
+echo -e "\t help: Displays this screen."
+echo -e "\t list: Lists running nodes."
+echo -e "\t list-all: Lists all nodes."
+echo -e "\t start NODE: Starts NODE"
+echo -e "\t stop NODE: Stops NODE"
+echo -e "\t restart NODE: restart NODE"
+echo -e "\t status [NODE]: Shows status of all or specific node NODE"
+echo -e "\t reset_nodes: Revert nodes to initial state."
+echo -e "\t restore_nodes: Restoring nodes to state at the beginning of course."
+exit
+}
+reset_nodes () {
+DIR=$(pwd)	
+for vm in $(virsh list|awk '/running/{print $2}')
+    do 
+        virsh destroy $vm
+    done
+cd /img
+for IMG in $(ls|grep -v base)
+   do
+    qemu-img snapshot -a configured ${IMG}
+done
+
+cd ${DIR}
+for i in master1 worker1 worker2 worker3
+    do
+        virsh start $i
+    done 
+}
+
+restore_nodes () {
+DIR=$(pwd)	
+for vm in $(virsh list|awk '/running/{print $2}')
+    do 
+        virsh destroy $vm
+    done
+cd /img
+for IMG in $(ls|grep -v base)
+   do
+    qemu-img snapshot -a installed ${IMG}
+done
+
+cd ${DIR}
+virsh start master1
+echo -e "Starting master1 node at first ...\nPlease be patient for 1 minute."
+sleep 60
+echo "Starting the rest of nodes ..."
+for i in  worker1 worker2 worker3
+    do
+        virsh start $i
+    done 
+}
+
+if [ $# -lt 1 ]
+ then
+  help
+fi
+
+case $1 in
+list)
+    virsh list
+  ;;
+start)
+    if [ $# -lt 2 ]
+     then
+      help
+    fi
+    if virsh list --all |grep -q $2
+      then
+         virsh start $2
+      else 
+         echo "$2 is not a valid node name."
+    fi
+  ;;
+restart)
+   if [ $# -lt 2 ]
+     then
+      help
+    fi
+    if virsh list |grep -q $2
+      then
+         virsh shutdown $2
+         virsh start $2
+      else 
+         echo "$2 is not a valid node name."
+    fi
+  ;;
+stop)
+    if [ $# -lt 2 ]
+     then
+      help
+    fi
+    if virsh list |grep -q $2
+      then
+         virsh shutdown $2
+       else 
+         echo "$2 is not a valid node name."
+    fi
+  ;;       
+
+list-all)
+   virsh list --all
+   ;;
+
+status)
+    if [ -z $2 ]
+       then
+         virsh list --all|tail -n +3|awk '{print $2 "\t" $3 $4}'
+       elif virsh list --all | grep -q $2
+         then
+           virsh list --all | grep $2 | awk '{print $2 "\t" $3 $4}'
+       else
+         echo "$2 is not a valid node name."
+    fi
+;;
+reset_nodes)
+	reset_nodes
+;;
+restore_nodes)
+	restore_nodes
+;;
+*)
+  help
+;;
+esac
+

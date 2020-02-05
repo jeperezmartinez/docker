@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: glusterfs
+spec:
+  containers:
+  - name: glusterfs
+    image: nginx
+    volumeMounts:
+    - mountPath: "/mnt/glusterfs1"
+      name: glusterfsvol1
+  volumes:
+  - name: glusterfsvol1
+    persistentVolumeClaim:
+      claimName: gluster-pvc1

@@ -1,0 +1,9 @@
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: glusterfs-cluster
+subsets:
+- addresses:
+  - ip: 10.10.10.1
+  ports:
+  - port: 1
